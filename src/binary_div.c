@@ -16,6 +16,7 @@ void run() {
     char *line = get_string();
     int len_line = strlen(line);
     print_half_string(line, len_line);
+    free(line);
 }
 
 /* Функция получения динамической строки */
