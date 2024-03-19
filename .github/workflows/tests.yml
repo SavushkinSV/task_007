@@ -23,7 +23,7 @@ jobs:
     - name: Install packages
       run: |
         sudo apt update
-        sudo apt -y install clang-format cppcheck
+        sudo apt -y install clang-format cppcheck libsqlite3-dev
 
     - name: Check with clang-format
       run: |
