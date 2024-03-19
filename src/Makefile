@@ -13,8 +13,8 @@ change_separator: change_separator.c
 binary_div: binary_div.c
 	$(CC) $(CFLAGS) binary_div.c -o ../bin/binary_div -lm
 
-real_db: real_db.c
-	$(CC) $(CFLAGS) real_db.c -o ../bin/real_db
+real_db: real_db.c 
+	$(CC) $(CFLAGS) real_db.c -o ../bin/real_db -l sqlite3
 
 clean:
 	rm -rf *.o *.out

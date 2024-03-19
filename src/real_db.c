@@ -1,3 +1,4 @@
+#include <sqlite3.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,9 +13,26 @@
 
 static char *menu_command[MENU_SIZE] = {"EXIT", "SHOW", "SHOWALL", "ADD", "REMOVE"};
 
+static int callback(void *const data, int argc, char **argv, char **azColName) {
+    if (!data) {
+        fprintf(stderr, "%s: ", azColName[0]);
+    }
+
+    for (int i = 0; i < argc; i++) {
+        if (i == argc - 1)
+            printf("%s", argv[i] ? argv[i] : "NULL");
+        else
+            printf("%s ", argv[i] ? argv[i] : "NULL");
+    }
+    printf("\n");
+
+    return 0;
+}
+
 void run();
 int get_command();
 char *get_string();
+void db_show_all();
 
 int main() {
     run();
@@ -27,13 +45,12 @@ void run() {
         command = get_command();
         switch (command) {
             case MENU_EXIT:
-                printf("MENU_EXIT\n");
                 break;
             case MENU_SHOW:
                 printf("MENU_SHOW\n");
                 break;
             case MENU_SHOWALL:
-                printf("MENU_SHOWALL\n");
+                db_show_all();
                 break;
             case MENU_ADD:
                 printf("MENU_ADD\n");
@@ -84,4 +101,24 @@ char *get_string() {
     line[len] = '\0';
 
     return line;
+}
+
+void db_show_all() {
+    sqlite3 *db;  // указатель на базу данных
+    // открываем подключение к базе данных
+    int rc = sqlite3_open("../data-samples/task007.db", &db);
+    if (rc) {
+        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+    } else {
+        char *zErrMsg = 0;
+        const char *data = "";
+        char *sql =
+            "SELECT id, Name, Age, email \
+            from Students \
+            ORDER BY id";
+        // rc = sqlite3_exec(db, sql, callback, (void *)data, &zErrMsg);
+        sqlite3_exec(db, sql, callback, (void *)data, &zErrMsg);
+    }
+    // закрываем подключение
+    sqlite3_close(db);
 }
