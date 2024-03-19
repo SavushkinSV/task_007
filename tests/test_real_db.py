@@ -31,27 +31,27 @@ if os.path.isfile(B_FILE_PATH):
         assert result.returncode == 0
         assert result.stdout.strip() == '1 Alexandr Naumov 24 a.naumov@yssu.ru\n18 Nikolay Volkov 21 n.volkov@yssu.ru'
     
-    def test_real_db_4():
+    def test_real_db_5():
         result = run([B_FILE_PATH], input='ADD\nBobr Kurwa 69 bobr@kurwa.pl\nSHOW\n19\nEXIT', encoding='utf-8', stdout=PIPE)
         assert result.returncode == 0
         assert result.stdout.strip() == '19 Bobr Kurwa 69 bobr@kurwa.pl'
     
-    def test_real_db_5():
+    def test_real_db_6():
         result = run([B_FILE_PATH], input='ADD\nJamil Mardam Bay Hashim al-Atassi Nazim al-Kudsi 72 longname@example.net\nSHOW\n20\nEXIT', encoding='utf-8', stdout=PIPE)
         assert result.returncode == 0
         assert result.stdout.strip() == '20 Jamil Mardam Bay Hashim al-Atassi Nazim al-Kudsi 72 longname@example.net'
     
-    def test_real_db_6():
+    def test_real_db_7():
         result = run([B_FILE_PATH], input='REMOVE\n888\nEXIT', encoding='utf-8', stdout=PIPE)
         assert result.returncode == 0
         assert result.stdout.strip() == ''
     
-    def test_real_db76():
+    def test_real_db_8():
         result = run([B_FILE_PATH], input='REMOVE\n888\nSHOWALL\nEXIT', encoding='utf-8', stdout=PIPE)
         assert result.returncode == 0
         assert result.stdout.strip() == '1 Alexandr Naumov 24 a.naumov@yssu.ru\n18 Nikolay Volkov 21 n.volkov@yssu.ru\n19 Bobr Kurwa 69 bobr@kurwa.pl\n20 Jamil Mardam Bay Hashim al-Atassi Nazim al-Kudsi 72 longname@example.net'
     
-    def test_real_db76():
+    def test_real_db_9():
         result = run([B_FILE_PATH], input='REMOVE\n20\nSHOWALL\nEXIT', encoding='utf-8', stdout=PIPE)
         assert result.returncode == 0
         assert result.stdout.strip() == '1 Alexandr Naumov 24 a.naumov@yssu.ru\n18 Nikolay Volkov 21 n.volkov@yssu.ru\n19 Bobr Kurwa 69 bobr@kurwa.pl'
