@@ -22,5 +22,5 @@ clean:
 check:
 	clang-format -style='{BasedOnStyle: Google, IndentWidth: 4, ColumnLimit: 110}' -n *.c
 	# clang-format -style='{BasedOnStyle: Google, IndentWidth: 4, ColumnLimit: 110}' -n *.h
-	cppcheck --enable=all --suppress=missingIncludeSystem *.c
+	cppcheck --enable=all --suppress=missingIncludeSystem *.c	
 	valgrind --tool=memcheck --leak-check=yes ../bin/real_db

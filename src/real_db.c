@@ -1,25 +1,4 @@
-#include <sqlite3.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#define MENU_SIZE 5
-#define MENU_INITIAL_VALUE -1
-#define MENU_EXIT 0
-#define MENU_SHOW 1
-#define MENU_SHOWALL 2
-#define MENU_ADD 3
-#define MENU_REMOVE 4
-#define DB_NAME_FILEPATH "../data-samples/task007.db"
-
-static char *menu_command[MENU_SIZE] = {"EXIT", "SHOW", "SHOWALL", "ADD", "REMOVE"};
-
-void run();
-int get_command();
-char *get_string();
-void db_show_all();
-void db_show();
-void db_remove();
+#include "real_db.h"
 
 int main() {
     run();
@@ -90,18 +69,16 @@ char *get_string() {
     return line;
 }
 
+/* Функция вывода всех строк в таблице */
 void db_show_all() {
-    sqlite3 *db;        // указатель на базу данных
-    sqlite3_stmt *res;  // компилируемое выражение
-    int rc = sqlite3_open(DB_NAME_FILEPATH, &db);
-    if (rc) {
-        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-    } else {
+    sqlite3 *db = db_open();
+    sqlite3_stmt *res;
+    if (db != NULL) {
         char *sql =
             "SELECT id, Name, Age, email \
             FROM Students \
             ORDER BY id";
-        rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
+        int rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
         if (rc == SQLITE_OK) {
             int step = 0;
             while ((step = sqlite3_step(res)) == SQLITE_ROW) {
@@ -111,24 +88,22 @@ void db_show_all() {
         } else {
             fprintf(stderr, "Error: %s\n", sqlite3_errmsg(db));
         }
+        sqlite3_finalize(res);
+        sqlite3_close(db);
     }
-    sqlite3_finalize(res);  // удаляем скомпилированное выражение
-    sqlite3_close(db);      // закрываем подключение
 }
 
+/* Функция отображения строки по id */
 void db_show() {
-    sqlite3 *db;        // указатель на базу данных
+    sqlite3 *db = db_open();
     sqlite3_stmt *res;  // компилируемое выражение
-    int rc = sqlite3_open(DB_NAME_FILEPATH, &db);
-    if (rc) {
-        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-    } else {
+    if (db != NULL) {
         char *id = get_string();
         char *sql =
             "SELECT id, Name, Age, email \
             FROM Students \
             WHERE id=?";
-        rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
+        int rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
         if (rc == SQLITE_OK) {
             sqlite3_bind_text(res, 1, id, -1, SQLITE_STATIC);  // привязываем параметр
             int step = sqlite3_step(res);                      // выполняем выражение
@@ -138,43 +113,44 @@ void db_show() {
             } else {
                 printf("NO DATA\n");
             }
-
         } else {
             fprintf(stderr, "Error: %s\n", sqlite3_errmsg(db));
         }
         free(id);
+        sqlite3_finalize(res);
+        sqlite3_close(db);
     }
-    sqlite3_finalize(res);  // удаляем скомпилированное выражение
-    sqlite3_close(db);
 }
 
+/* Функция удаления строки по id */
 void db_remove() {
-    sqlite3 *db;
+    sqlite3 *db = db_open();
     sqlite3_stmt *res;
-    int rc = sqlite3_open(DB_NAME_FILEPATH, &db);
-    if (rc) {
-        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-    } else {
+    if (db != NULL) {
         char *id = get_string();
         char *sql =
             "DELETE \
-            from Students \
+            FROM Students \
             WHERE id=?";
-        rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
+        int rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
         if (rc == SQLITE_OK) {
             sqlite3_bind_text(res, 1, id, -1, SQLITE_STATIC);
-            int step = sqlite3_step(res);
-            if (step == SQLITE_ROW) {
-                printf("%d %s %d %s\n", sqlite3_column_int(res, 0), sqlite3_column_text(res, 1),
-                       sqlite3_column_int(res, 2), sqlite3_column_text(res, 3));
-            } else {
-                printf("NO DATA\n");
-            }
-
+            sqlite3_step(res);
         } else {
             fprintf(stderr, "Error: %s\n", sqlite3_errmsg(db));
         }
         free(id);
+        sqlite3_finalize(res);
+        sqlite3_close(db);
     }
-    sqlite3_close(db);
+}
+
+/* Функция открытия файла с базой данных */
+sqlite3 *db_open() {
+    sqlite3 *db = NULL;
+    int rc = sqlite3_open(DB_NAME_FILEPATH, &db);
+    if (rc) {
+        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+    }
+    return db;
 }
