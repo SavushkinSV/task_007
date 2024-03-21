@@ -19,7 +19,7 @@ void run() {
                 db_show_all();
                 break;
             case MENU_ADD:
-                printf("MENU_ADD\n");
+                db_add();
                 break;
             case MENU_REMOVE:
                 db_remove();
@@ -30,6 +30,7 @@ void run() {
     }
 }
 
+/* Функция получения команды */
 int get_command() {
     int result = MENU_INITIAL_VALUE;
     char *line = get_string();
@@ -153,4 +154,64 @@ sqlite3 *db_open() {
         fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
     }
     return db;
+}
+
+/* Функция добавления новой строки */
+void db_add() {
+    sqlite3 *db = db_open();
+    sqlite3_stmt *res;
+    if (db != NULL) {
+        char *line = get_string();
+        char *name = NULL;
+        char *age = NULL;
+        char *email = NULL;
+        char *token = strtok(line, " ");
+        while (token != NULL) {
+            if (*token >= '0' && *token <= '9') {
+                age = (char *)malloc((strlen(token) + 1) * sizeof(char));
+                strcpy(age, token);
+                token = strtok(NULL, " ");
+                email = (char *)malloc((strlen(token) + 1) * sizeof(char));
+                strcpy(email, token);
+            } else {
+                name = cat_string(name, token);
+            }
+            token = strtok(NULL, " ");
+        }
+        char *sql =
+            "INSERT \
+            INTO Students (Name, Age, email) \
+            VALUES (?, ?, ?)";
+        int rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
+        if (rc == SQLITE_OK) {
+            sqlite3_bind_text(res, 1, name, -1, SQLITE_STATIC);
+            sqlite3_bind_text(res, 2, age, -1, SQLITE_STATIC);
+            sqlite3_bind_text(res, 3, email, -1, SQLITE_STATIC);
+            sqlite3_step(res);
+        } else {
+            fprintf(stderr, "Error: %s\n", sqlite3_errmsg(db));
+        }
+        free(line);
+        free(name);
+        free(age);
+        free(email);
+        sqlite3_finalize(res);
+        sqlite3_close(db);
+    }
+}
+
+/* Функция конкатенации строки. Возвращает новый указатель */
+char *cat_string(char *dest, char *append) {
+    int len_append = strlen(append);
+    if (dest != NULL) {
+        int len_dest = strlen(dest);
+        dest = realloc(dest, (len_dest + len_append + 2) * sizeof(char));
+        strcat(dest, " ");
+        strcat(dest, append);
+    } else {
+        dest = (char *)malloc((len_append + 2) * sizeof(char));
+        strcpy(dest, append);
+    }
+
+    return dest;
 }

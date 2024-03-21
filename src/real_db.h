@@ -22,7 +22,9 @@ int get_command();
 char *get_string();
 void db_show_all();
 void db_show();
+void db_add();
 void db_remove();
 sqlite3 *db_open();
+char *cat_string(char *dest, char *append);
 
 #endif  // REAL_DB_H
